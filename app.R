@@ -3,19 +3,31 @@ library(tidyverse)
 library(viridis)
 faithful <- as_tibble(datasets::faithful[, 2])
 
+
 # Define UI for application that draws a histogram
+
+test <- read_csv("Unemployment_by_state.csv")
+test <- test |>
+  mutate(across(-1,as.numeric))
+u3 <- test |>
+  pivot_longer(cols = -1,
+               names_to = "date",
+               values_to = "unemployment")
+u3$date <- str_replace(u3$date," "," 01 ")
+u3$date <- mdy(u3$date)
+
 ui <- fluidPage(
   
   # Application title
-  titlePanel("Old Faithful Geyser Data"),
+  titlePanel("Unemployment Rate"),
   
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
       sliderInput(inputId = "bins",
-                  label = "Number of bins:",
+                  label = "Number of States:",
                   min = 1,
-                  max = 60,
+                  max = 50,
                   value = 30)
     ),
     
@@ -37,12 +49,13 @@ server <- function(input, output) {
                         end = 1, 
                         direction = 1, option = "B")
     
-    ggplot(faithful, aes(x = value)) +
-      geom_histogram(bins = input$bins,
-                     fill = v_colors) +
-      labs(x = 'Waiting time to next eruption (in mins)',
-           y = "Count",
-           title = 'Histogram of waiting times') +
+    ggplot(u3, aes(x = reorder(State, -unemployment), y = unemployment, fill = State)) +
+      geom_bar(bins = input$bins,
+               stat = 'identity') +
+      scale_fill_viridis_d(option = "B") +
+      labs(x = 'State',
+           y = "Unemployment Rate",
+           title = 'Histogram of Unemployment Per State') +
       theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5,
                                       size = rel(1.5),
