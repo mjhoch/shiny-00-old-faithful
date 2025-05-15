@@ -27,8 +27,8 @@ ui <- fluidPage(
       sliderInput(inputId = "bins",
                   label = "Number of States:",
                   min = 1,
-                  max = 50,
-                  value = 30)
+                  max = 11,
+                  value = 5)
     ),
     
     # Show a plot of the generated distribution
@@ -49,13 +49,12 @@ server <- function(input, output) {
                         end = 1, 
                         direction = 1, option = "B")
     
-    ggplot(u3, aes(x = reorder(State, -unemployment), y = unemployment, fill = State)) +
-      geom_bar(bins = input$bins,
-               stat = 'identity') +
-      scale_fill_viridis_d(option = "B") +
+    ggplot(u3, aes(x = year(date), y = after_stat(density))) +
+      geom_histogram(bins = input$bins,
+                     fill = v_colors) +
       labs(x = 'State',
-           y = "Unemployment Rate",
-           title = 'Histogram of Unemployment Per State') +
+           y = "Density",
+           title = 'Histogram of Unemployment Density Per Year') +
       theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5,
                                       size = rel(1.5),
